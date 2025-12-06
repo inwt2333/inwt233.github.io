@@ -14,206 +14,93 @@
     
     <style>
         /* --- 全局设置 --- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth; /* 开启平滑滚动 */
-        }
-
-        body {
-            /* 移除 overflow: hidden，允许滚动 */
-            background-color: #0d0d1e; 
-            font-family: 'Noto Sans SC', sans-serif;
-            color: white;
-            /* height: 100vh; <-- 移除固定高度 */
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { background-color: #0d0d1e; font-family: 'Noto Sans SC', sans-serif; color: white; }
 
         /* --- 分屏容器设置 --- */
-        section {
-            width: 100%;
-            height: 100vh; /* 每一屏都是 100% 视口高度 */
-            position: relative;
-            overflow: hidden;
-        }
+        section { width: 100%; position: relative; overflow: hidden; }
+        
+        /* 设置前两屏高度为 100vh */
+        #section-home, #section-about { height: 100vh; }
 
         /* === 第一屏：赛博朋克首页 === */
-        #section-home {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #0d0d1e;
-        }
-
-        /* --- 动态背景画布 (只在第一屏显示) --- */
-        #canvas-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
+        #section-home { display: flex; justify-content: center; align-items: center; background-color: #0d0d1e; }
+        #canvas-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
 
         /* --- 主体卡片 --- */
         .card {
-            position: relative;
-            z-index: 10;
-            width: 350px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 40px 20px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
-            transition: transform 0.3s;
+            position: relative; z-index: 10; width: 350px;
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
+            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px 20px; text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2); transition: transform 0.3s;
         }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 50px rgba(255, 0, 128, 0.4);
-        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 0 50px rgba(255, 0, 128, 0.4); }
 
         /* --- 底部跳动箭头 --- */
         .scroll-indicator {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 20;
-            cursor: pointer;
-            animation: bounce 2s infinite;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.6);
-            transition: color 0.3s;
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 20;
+            cursor: pointer; animation: bounce 2s infinite; text-align: center; color: rgba(255, 255, 255, 0.6); transition: color 0.3s;
         }
-
-        .scroll-indicator:hover {
-            color: #00fff9;
-        }
-
-        .scroll-indicator i {
-            font-size: 2em;
-        }
+        .scroll-indicator:hover { color: #00fff9; } .scroll-indicator i { font-size: 2em; }
 
         /* === 第二屏：纯白自我介绍 === */
-        #section-about {
-            background-color: #ffffff;
-            color: #333; /* 深灰文字 */
+        #section-about { background-color: #ffffff; color: #333; display: flex; justify-content: center; align-items: center; z-index: 30; }
+        .about-content { text-align: left; max-width: 800px; width: 80%; font-family: 'Rajdhani', 'Noto Sans SC', sans-serif; }
+        .reveal-text { font-size: 3em; font-weight: 700; line-height: 1.5; opacity: 0; transform: translateY(30px); transition: all 1s ease-out; display: block; }
+        .reveal-text.visible { opacity: 1; transform: translateY(0); }
+        .delay-1 { transition-delay: 0.2s; } .delay-2 { transition-delay: 0.8s; } .delay-3 { transition-delay: 1.4s; }
+
+        /* === 第三屏：博客列表 (修改版) === */
+        #section-blog {
+            background-color: #f9f9f9; 
+            color: #333;
             display: flex;
-            justify-content: center; /* 水平居中容器 */
-            align-items: center;     /* 垂直居中容器 */
-            z-index: 30; /* 确保盖住上面的内容 */
+            flex-direction: column;
+            align-items: center;
+            padding: 80px 20px;
+            min-height: 100vh; /* 最小高度一屏，内容多可自动撑开 */
+            height: auto; 
         }
 
-        .about-content {
-            text-align: left; /* 文字内容左对齐 */
-            max-width: 800px;
-            width: 80%;
-            font-family: 'Rajdhani', 'Noto Sans SC', sans-serif;
+        .blog-header {
+            font-family: 'Rajdhani', sans-serif; font-size: 2.5em; margin-bottom: 40px; font-weight: 700; color: #0d0d1e;
         }
 
-        /* --- 文字逐行显现动画类 --- */
-        .reveal-text {
-            font-size: 3em;
-            font-weight: 700;
-            line-height: 1.5;
-            opacity: 0; /* 初始隐藏 */
-            transform: translateY(30px); /* 初始下沉 */
-            transition: all 1s ease-out; /* 过渡效果 */
-            display: block; /* 强制换行 */
+        .blog-container {
+            max-width: 900px; width: 100%; display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
         }
 
-        /* 当添加了 .visible 类后，变为可见 */
-        .reveal-text.visible {
-            opacity: 1;
-            transform: translateY(0);
+        .blog-card {
+            background: white; border-radius: 12px; padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;
+            display: flex; flex-direction: column; text-decoration: none; /* 去掉链接下划线 */
         }
-
-        /* 设置不同的延迟，实现逐行显示 */
-        .delay-1 { transition-delay: 0.2s; }
-        .delay-2 { transition-delay: 0.8s; } /* 稍微久一点，让用户读完Hello */
-        .delay-3 { transition-delay: 1.4s; }
+        .blog-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        .post-date { font-size: 0.8em; color: #999; margin-bottom: 10px; font-family: 'Share Tech Mono', monospace; }
+        .post-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; color: #333; line-height: 1.4; }
+        .post-summary { font-size: 0.9em; color: #666; line-height: 1.6; flex-grow: 1; }
 
         /* --- 原有样式保留 --- */
-        .avatar-container {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 20px;
-            border-radius: 50%;
-            padding: 3px;
-            background: linear-gradient(45deg, #00f260, #0575e6, #ff0080);
-            /* animation: spin-glow 3s linear infinite; */
-        }
-
-        .avatar {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #1a1a2e;
-        }
-
-        .glitch-name {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #fff;
-            position: relative;
-            margin-bottom: 10px;
-            text-transform: none;
-        }
-        
-        .glitch-name::before, .glitch-name::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%; background: #0d0d1e;
-        }
-        
-        .glitch-name::before {
-            left: 2px; text-shadow: -1px 0 #ff00c1; clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim 5s infinite linear alternate-reverse;
-        }
-        
-        .glitch-name::after {
-            left: -2px; text-shadow: -1px 0 #00fff9; clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim2 5s infinite linear alternate-reverse;
-        }
-
-        .bio-text {
-            color: #a0a0c0;
-            font-size: 0.9em;
-            margin-bottom: 25px;
-            height: 1.5em; 
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 500;
-        }
-        
+        .avatar-container { width: 120px; height: 120px; margin: 0 auto 20px; border-radius: 50%; padding: 3px; background: linear-gradient(45deg, #00f260, #0575e6, #ff0080); }
+        .avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #1a1a2e; }
+        .glitch-name { font-family: 'Rajdhani', sans-serif; font-size: 2.5em; font-weight: bold; color: #fff; position: relative; margin-bottom: 10px; text-transform: none; }
+        .glitch-name::before, .glitch-name::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0d0d1e; }
+        .glitch-name::before { left: 2px; text-shadow: -1px 0 #ff00c1; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim 5s infinite linear alternate-reverse; }
+        .glitch-name::after { left: -2px; text-shadow: -1px 0 #00fff9; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim2 5s infinite linear alternate-reverse; }
+        .bio-text { color: #a0a0c0; font-size: 0.9em; margin-bottom: 25px; height: 1.5em; font-family: 'Rajdhani', sans-serif; font-weight: 500; }
         .cursor { display: inline-block; width: 2px; background-color: #00fff9; animation: blink 1s infinite; }
-
-        .music-visualizer {
-            display: flex; justify-content: center; align-items: flex-end; height: 30px; margin-bottom: 25px; gap: 5px;
-        }
-
-        .bar {
-            width: 6px; background: linear-gradient(to top, #00f260, #0575e6); border-radius: 3px; animation: bounce 1s infinite ease-in-out;
-        }
-        
-        .bar:nth-child(1) { height: 10px; animation-delay: 0.1s; }
-        .bar:nth-child(2) { height: 15px; animation-delay: 0.3s; }
-        .bar:nth-child(3) { height: 25px; animation-delay: 0.0s; }
-        .bar:nth-child(4) { height: 18px; animation-delay: 0.4s; }
-        .bar:nth-child(5) { height: 12px; animation-delay: 0.2s; }
-
+        .music-visualizer { display: flex; justify-content: center; align-items: flex-end; height: 30px; margin-bottom: 25px; gap: 5px; }
+        .bar { width: 6px; background: linear-gradient(to top, #00f260, #0575e6); border-radius: 3px; animation: bounce 1s infinite ease-in-out; }
+        .bar:nth-child(1) { height: 10px; animation-delay: 0.1s; } .bar:nth-child(2) { height: 15px; animation-delay: 0.3s; } .bar:nth-child(3) { height: 25px; animation-delay: 0.0s; } .bar:nth-child(4) { height: 18px; animation-delay: 0.4s; } .bar:nth-child(5) { height: 12px; animation-delay: 0.2s; }
         .social-links a { color: rgba(255,255,255,0.7); font-size: 1.5em; margin: 0 10px; transition: all 0.3s; }
         .social-links a:hover { color: #fff; text-shadow: 0 0 10px #00fff9; transform: scale(1.2); }
 
         @keyframes bounce { 0%, 100% { transform: translateY(0) scaleY(0.5); } 50% { transform: translateY(-5px) scaleY(1.2); } }
-        /* 箭头专用跳动动画 */
         @keyframes arrow-bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
         @keyframes glitch-anim { 0% { clip: rect(33px, 9999px, 11px, 0); } 100% { clip: rect(70px, 9999px, 5px, 0); } }
@@ -222,12 +109,9 @@
 </head>
 <body>
 
-    <!-- === 第一屏：首页 (Home) === -->
+    <!-- === 第一屏：首页 === -->
     <section id="section-home">
-        <!-- 背景 Canvas -->
         <canvas id="canvas-bg"></canvas>
-
-        <!-- 个人主页卡片 -->
         <div class="card">
             <div class="avatar-container">
                 <img src="my-avatar.jpg" alt="Avatar" class="avatar">
@@ -243,140 +127,106 @@
                 <a href="mailto:inwt233@sjtu.edu.cn" title="Email"><i class="fas fa-envelope"></i></a>
             </div>
         </div>
-
-        <!-- 向下的箭头 (点击可平滑滚动) -->
-        <a href="#section-about" class="scroll-indicator" title="Scroll Down">
-            <i class="fas fa-chevron-down"></i>
-        </a>
+        <a href="#section-about" class="scroll-indicator"><i class="fas fa-chevron-down"></i></a>
     </section>
 
-    <!-- === 第二屏：白色简介 (About) === -->
+    <!-- === 第二屏：简介 === -->
     <section id="section-about">
         <div class="about-content">
-            <!-- 加上 reveal-text 类，JS 会控制它们逐行显示 -->
             <span class="reveal-text delay-1">Hello,</span>
             <span class="reveal-text delay-2">我是Inwt,</span>
             <span class="reveal-text delay-3">一名研究AI的大二学生。</span>
         </div>
     </section>
 
-    <script>
-        /* --- 0. 滚动显现动画 (Intersection Observer) --- */
-        // 这个脚本负责检测“第二屏”是否出现在屏幕上
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.3 // 当第二屏显示 30% 时触发动画
-        };
+    <!-- === 第三屏：博客列表 === -->
+    <section id="section-blog">
+        <h2 class="blog-header">MY_ARCHIVES</h2>
+        <div class="blog-container" id="blog-list">
+            <!-- JS 会把卡片插在这里 -->
+        </div>
+    </section>
 
+    <script>
+        /* --- 动画与特效 JS --- */
         const observer = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    // 如果看到了第二屏，给所有文字加上 'visible' 类
                     const texts = entry.target.querySelectorAll('.reveal-text');
                     texts.forEach(text => text.classList.add('visible'));
-                    // 动画只触发一次，取消观察
                     observer.unobserve(entry.target);
                 }
             });
-        }, observerOptions);
-
-        // 开始观察第二屏
+        }, { threshold: 0.3 });
         observer.observe(document.getElementById('section-about'));
 
-
-        /* --- 1. 打字机特效 (原版) --- */
         const texts = ["SJTU", "Violin🎻 & Piano🎹 Lover", "Student in AI", "Always sleepy"]; 
         let count = 0; let index = 0; let currentText = ""; let letter = "";
-
         (function type() {
             if (count === texts.length) count = 0;
             currentText = texts[count];
             letter = currentText.slice(0, ++index);
             document.getElementById('typewriter').textContent = letter;
-
-            if (letter.length === currentText.length) {
-                count++; index = 0; setTimeout(type, 2000); 
-            } else {
-                setTimeout(type, 150);
-            }
+            if (letter.length === currentText.length) { count++; index = 0; setTimeout(type, 2000); } 
+            else { setTimeout(type, 150); }
         })();
 
-        /* --- 2. 背景 AI 粒子 (原版) --- */
         const canvas = document.getElementById("canvas-bg");
         const ctx = canvas.getContext("2d");
-        
-        // 注意：粒子画布只在第一屏，所以这里获取第一屏的大小
         const sectionHome = document.getElementById("section-home");
-        canvas.width = sectionHome.clientWidth;
-        canvas.height = sectionHome.clientHeight;
-
+        canvas.width = sectionHome.clientWidth; canvas.height = sectionHome.clientHeight;
         let particlesArray;
-
         class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.directionX = (Math.random() * 1) - 0.5; 
-                this.directionY = (Math.random() * 1) - 0.5;
-                this.size = Math.random() * 2; 
-                this.isNote = Math.random() > 0.8; 
-                this.noteSymbol = Math.random() > 0.5 ? '♪' : '♫';
-            }
-            draw() {
-                ctx.beginPath();
-                if (this.isNote) {
-                    ctx.font = "15px Arial"; ctx.fillStyle = "#ff0080"; ctx.fillText(this.noteSymbol, this.x, this.y);
-                } else {
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false); ctx.fillStyle = '#00fff9'; ctx.fill();
-                }
-            }
-            update() {
-                if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
-                if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
-                this.x += this.directionX; this.y += this.directionY;
-                this.draw();
-            }
+            constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.directionX = (Math.random() * 1) - 0.5; this.directionY = (Math.random() * 1) - 0.5; this.size = Math.random() * 2; this.isNote = Math.random() > 0.8; this.noteSymbol = Math.random() > 0.5 ? '♪' : '♫'; }
+            draw() { ctx.beginPath(); if (this.isNote) { ctx.font = "15px Arial"; ctx.fillStyle = "#ff0080"; ctx.fillText(this.noteSymbol, this.x, this.y); } else { ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false); ctx.fillStyle = '#00fff9'; ctx.fill(); } }
+            update() { if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX; if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY; this.x += this.directionX; this.y += this.directionY; this.draw(); }
         }
+        function init() { particlesArray = []; let numberOfParticles = (canvas.height * canvas.width) / 9000; for (let i = 0; i < numberOfParticles; i++) { particlesArray.push(new Particle()); } }
+        function animate() { requestAnimationFrame(animate); ctx.clearRect(0, 0, canvas.width, canvas.height); for (let i = 0; i < particlesArray.length; i++) { particlesArray[i].update(); } connect(); }
+        function connect() { let opacityValue = 1; for (let a = 0; a < particlesArray.length; a++) { for (let b = a; b < particlesArray.length; b++) { let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y)); if (distance < (canvas.width/7) * (canvas.height/7)) { opacityValue = 1 - (distance / 20000); ctx.strokeStyle = 'rgba(0, 255, 249,' + opacityValue + ')'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(particlesArray[a].x, particlesArray[a].y); ctx.lineTo(particlesArray[b].x, particlesArray[b].y); ctx.stroke(); } } } }
+        window.addEventListener('resize', function(){ canvas.width = sectionHome.clientWidth; canvas.height = sectionHome.clientHeight; init(); });
+        init(); animate();
 
-        function init() {
-            particlesArray = [];
-            let numberOfParticles = (canvas.height * canvas.width) / 9000; 
-            for (let i = 0; i < numberOfParticles; i++) { particlesArray.push(new Particle()); }
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particlesArray.length; i++) { particlesArray[i].update(); }
-            connect(); 
-        }
-
-        function connect() {
-            let opacityValue = 1;
-            for (let a = 0; a < particlesArray.length; a++) {
-                for (let b = a; b < particlesArray.length; b++) {
-                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
-                                   ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
-                    if (distance < (canvas.width/7) * (canvas.height/7)) {
-                        opacityValue = 1 - (distance / 20000);
-                        ctx.strokeStyle = 'rgba(0, 255, 249,' + opacityValue + ')';
-                        ctx.lineWidth = 1;
-                        ctx.beginPath(); ctx.moveTo(particlesArray[a].x, particlesArray[a].y); ctx.lineTo(particlesArray[b].x, particlesArray[b].y); ctx.stroke();
-                    }
-                }
-            }
-        }
-        
-        // 窗口大小改变时重置
-        window.addEventListener('resize', function(){
-            canvas.width = sectionHome.clientWidth;
-            canvas.height = sectionHome.clientHeight;
-            init();
+        /* --- 3. 博客渲染系统 (跳转版) --- */
+        document.addEventListener('DOMContentLoaded', () => {
+            const blogContainer = document.getElementById('blog-list');
+            
+            // 获取文章索引列表
+            fetch('posts.json')
+                .then(response => response.json())
+                .then(data => {
+                    renderBlogList(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    blogContainer.innerHTML = '<p style="text-align:center; color:#999;">文章列表加载失败</p>';
+                });
         });
 
-        init();
-        animate();
+        function renderBlogList(data) {
+            const blogContainer = document.getElementById('blog-list');
+            blogContainer.innerHTML = ''; // 清空
+
+            data.forEach((post) => {
+                const card = document.createElement('div');
+                card.className = 'blog-card';
+                
+                // === 关键修改 ===
+                // 点击卡片，打开新窗口 (article.html)，并带上文件名作为参数
+                card.onclick = () => {
+                    // encodeURIComponent 是为了防止文件名里有特殊字符导致网址出错
+                    const targetUrl = `article.html?file=${encodeURIComponent(post.file)}&title=${encodeURIComponent(post.title)}&date=${encodeURIComponent(post.date)}`;
+                    window.open(targetUrl, '_blank'); 
+                };
+                
+                card.innerHTML = `
+                    <div class="post-date">${post.date}</div>
+                    <h3 class="post-title">${post.title}</h3>
+                    <div class="post-summary">${post.summary}</div>
+                `;
+                blogContainer.appendChild(card);
+            });
+        }
     </script>
 </body>
 </html>

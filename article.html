@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正在加载文章...</title>
+    
+    <!-- 字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- Markdown 解析库 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- MathJax 公式支持 -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #ffffff;
+            color: #333;
+            font-family: 'Noto Sans SC', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 60px 20px;
+        }
+
+        .article-container {
+            width: 100%;
+            max-width: 800px; /* 限制阅读宽度，体验更好 */
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* 头部信息 */
+        header {
+            margin-bottom: 40px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+        }
+
+        h1.article-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #0d0d1e;
+            margin-bottom: 15px;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        .article-meta {
+            color: #999;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        /* --- Markdown 内容样式 (GitHub 风格优化) --- */
+        .markdown-body {
+            line-height: 1.8;
+            font-size: 1.1em;
+            color: #24292e;
+        }
+
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 { margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; color: #0d0d1e; }
+        .markdown-body h1 { font-size: 2em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+        .markdown-body h2 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+        
+        .markdown-body p { margin-bottom: 1.2em; }
+        
+        .markdown-body code {
+            background-color: #f6f8fa;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85em;
+            color: #d63384;
+        }
+
+        .markdown-body pre {
+            background-color: #f6f8fa;
+            padding: 16px;
+            overflow: auto;
+            border-radius: 6px;
+            margin-bottom: 1.2em;
+        }
+        
+        .markdown-body pre code {
+            background-color: transparent;
+            padding: 0;
+            color: #333;
+        }
+
+        .markdown-body blockquote {
+            color: #6a737d;
+            border-left: 0.25em solid #00f260;
+            padding: 0 1em;
+            margin-bottom: 1.2em;
+            background: #f9f9f9;
+        }
+
+        .markdown-body img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 10px 0;
+        }
+        
+        .markdown-body a { color: #0366d6; text-decoration: none; }
+        .markdown-body a:hover { text-decoration: underline; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="article-container">
+        <header>
+            <h1 class="article-title" id="title-placeholder">加载中...</h1>
+            <div class="article-meta" id="date-placeholder"></div>
+        </header>
+
+        <div id="content" class="markdown-body">
+            <!-- Markdown 内容将渲染在这里 -->
+        </div>
+    </div>
+
+    <script>
+        // 1. 获取 URL 里的参数
+        const params = new URLSearchParams(window.location.search);
+        const fileName = params.get('file'); // 获取文件名
+        const title = params.get('title');   // 获取标题
+        const date = params.get('date');     // 获取日期
+
+        // 2. 填充头部信息
+        if (title) {
+            document.title = title + " | Inwt's Blog"; // 修改浏览器标签页标题
+            document.getElementById('title-placeholder').textContent = title;
+        }
+        if (date) {
+            document.getElementById('date-placeholder').textContent = "发布于 " + date;
+        }
+
+        // 3. 加载 Markdown 文件
+        if (fileName) {
+            fetch(`posts/${fileName}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("文件未找到");
+                    return response.text();
+                })
+                .then(text => {
+                    // 去掉开头的 YAML Front Matter (--- ... ---)
+                    const cleanMarkdown = text.replace(/^---[\s\S]*?---\s*/, '');
+                    
+                    // 渲染为 HTML
+                    document.getElementById('content').innerHTML = marked.parse(cleanMarkdown);
+
+                    // 渲染数学公式
+                    if (window.MathJax) {
+                        MathJax.typesetPromise();
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('content').innerHTML = `<p style="color:red; text-align:center;">文章加载失败：${err.message}</p>`;
+                });
+        } else {
+            document.getElementById('content').innerHTML = '<p style="text-align:center;">无效的文章链接。</p>';
+        }
+    </script>
+</body>
+</html>
